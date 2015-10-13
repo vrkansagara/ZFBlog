@@ -1,0 +1,48 @@
+<article class="blog">
+<h2>Zend Framework 1.12.13 Released!</h2>
+<p>
+    The Zend Framework community is pleased to announce the immediate availability
+    of:
+</p>
+
+<ul>
+    <li>Zend Framework <strong>1.12.13</strong></li>
+</ul>
+
+<p>You can download Zend Framework at:</p>
+
+<ul>
+    <li>
+        <a href="/downloads/latest#ZF1">http://framework.zend.com/downloads/latest#ZF1</a>
+    </li>
+</ul><h2>Regression Fix</h2>
+
+<p>
+  Version 1.12.12 included a fix for <a href="/security/advisory/ZF2015-04">ZF2015-04</a>,
+  which details message splitting vulnerabilities in <code>Zend_Mail</code> and <code>Zend_Http</code>.
+  The fix, however, was slightly too strict, and did not allow integer or float values as HTTP header
+  values. In most cases, this is not an issue, but several key headers such as <code>Content-Length</code>
+  are typically provided as integers. As such, many components such as <code>Zend_XmlRpc</code>,
+  <code>Zend_OpenId</code>, and a variety of <code>Zend_Service</code> components were affected.
+</p>
+
+<p>
+  Version 1.12.13 contains a fix for this issue. If you use <code>Zend_Http</code>, or one of the
+  various <code>Zend_Service</code>, <code>Zend_OpenId</code>, <code>Zend_Oauth</code> components,
+  we highly recommend upgrading immediately.
+</p></article>
+
+<aside class="sidebar blog">
+    <div class="metadata">
+        <ul>
+            <li>Posted on <b>2015-05-20 12:00:00</b>.</li>
+            <li>Last updated on <b>2015-05-20 12:00:00</b>.</li>
+        </ul>
+    </div>
+
+    <div class="metadata">
+        <h4>Tags for this entry</h4>
+        <p class="tags"></p>
+    </div>
+</aside>
+

@@ -1,0 +1,106 @@
+<article class="blog">
+<h2>Zend\Db in ZF 2.1</h2>
+<p>
+    <code>Zend\Db</code> just got a little better with the release of Zend 
+    Framework 2.1.  All the cool things you could do on Mysql, SQLite, 
+    Postgresql and SQL Server can now be done on DB2 and Oracle.  In addition, 
+    a number of additions were brought into the <code>Zend\Db\Sql\Select</code> object as 
+    well.
+</p><h3>Connecting to DB2 and Oracle</h3>
+
+<p>
+    Connecting to DB2 whether on Windows, *nix, Mac, or the IBM i, is the
+    same as any other driver - using the array notation:
+</p>
+
+<pre class="highlight"><code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php<br /></span><span style="color: #007700">use&nbsp;</span><span style="color: #0000BB">Zend</span><span style="color: #007700">\</span><span style="color: #0000BB">Db</span><span style="color: #007700">\</span><span style="color: #0000BB">Adapter</span><span style="color: #007700">\</span><span style="color: #0000BB">Adapter&nbsp;</span><span style="color: #007700">as&nbsp;</span><span style="color: #0000BB">DbAdapter</span><span style="color: #007700">;<br /><br /></span><span style="color: #FF8000">//&nbsp;DB2&nbsp;Connection<br /></span><span style="color: #0000BB">$adapter&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">DbAdapter</span><span style="color: #007700">(array(<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'driver'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'IbmDb2'</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'database'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'*LOCAL'</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'username'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">''</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'password'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">''</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'driver_options'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;array(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'i5_naming'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #0000BB">DB2_I5_NAMING_ON</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'i5_libl'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'LIB1&nbsp;LIB2&nbsp;LIB3'<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #007700">),<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'platform_options'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;array(</span><span style="color: #DD0000">'quote_identifiers'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #0000BB">false</span><span style="color: #007700">)<br />);<br /><br /></span><span style="color: #FF8000">//&nbsp;Oracle&nbsp;Connection<br /></span><span style="color: #0000BB">$adapter&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">DbAdapter</span><span style="color: #007700">(array(<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'driver'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'Oci8'</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'hostname'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'localhost/XE'</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'username'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'developer'</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #DD0000">'password'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #DD0000">'developer'<br /></span><span style="color: #007700">));<br /></span>
+</span>
+</code></pre>
+
+<p>
+    Both Oracle and DB2 carry different conventional usage patterns and 
+    workflows than their more modern successors in the relational database 
+    space.  As such, certain default behaviors can be turned off.  For example, 
+    by default, when queries are generated via any of the <code>Zend\Db\Sql</code> object
+    (SQL abstraction), all known identifiers are identifier quoted.  That means 
+    if a developer wrote: <code>$select->from('foo');</code> then "foo" would be quoted 
+        in the database platform specific way.  For MySQL this means 
+        back-ticks, like <code>`foo`</code>, and for most other database that means being 
+        quoted with double quotes.  In cases of Oracle and DB2 where there is a 
+        pronounced history of not quoting identifiers, <code>Zend\Db\Adapter</code> can be 
+        provided an option to turn this off - as you can see above in the 
+        "platform_options".
+</p>
+
+<p>
+    Once an adapter is created, it can be used by any of the <code>Zend\Db</code> API.  Here 
+    are a few examples of what you can do:
+</p>
+
+<pre class="highlight"><code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php<br /></span><span style="color: #FF8000">//&nbsp;Zend\Db\TableGateway<br /></span><span style="color: #007700">use&nbsp;</span><span style="color: #0000BB">Zend</span><span style="color: #007700">\</span><span style="color: #0000BB">Db</span><span style="color: #007700">\</span><span style="color: #0000BB">TableGateway</span><span style="color: #007700">\</span><span style="color: #0000BB">TableGateway</span><span style="color: #007700">;<br />&nbsp;<br /></span><span style="color: #0000BB">$table&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">TableGateway</span><span style="color: #007700">(</span><span style="color: #DD0000">'ARTIST'</span><span style="color: #007700">),&nbsp;</span><span style="color: #0000BB">$adapter</span><span style="color: #007700">);<br /></span><span style="color: #0000BB">$results&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">$table</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">select</span><span style="color: #007700">(array(</span><span style="color: #DD0000">'ARTIST_ID&nbsp;&gt;&nbsp;?'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #0000BB">5000</span><span style="color: #007700">));<br /><br /></span><span style="color: #FF8000">//&nbsp;iterate&nbsp;results&nbsp;outputting&nbsp;each&nbsp;column<br /></span><span style="color: #007700">foreach&nbsp;(</span><span style="color: #0000BB">$results&nbsp;</span><span style="color: #007700">as&nbsp;</span><span style="color: #0000BB">$row</span><span style="color: #007700">)&nbsp;{<br />&nbsp;&nbsp;echo&nbsp;</span><span style="color: #DD0000">'&amp;lt;tr&amp;gt;'</span><span style="color: #007700">;<br />&nbsp;&nbsp;foreach&nbsp;(</span><span style="color: #0000BB">$row&nbsp;</span><span style="color: #007700">as&nbsp;</span><span style="color: #0000BB">$col</span><span style="color: #007700">)&nbsp;{<br />&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;</span><span style="color: #DD0000">'&amp;lt;td&amp;gt;'&nbsp;</span><span style="color: #007700">.&nbsp;</span><span style="color: #0000BB">$col&nbsp;</span><span style="color: #007700">.&nbsp;</span><span style="color: #DD0000">'&amp;lt;/td&amp;gt;'</span><span style="color: #007700">;<br />&nbsp;&nbsp;}<br />&nbsp;&nbsp;echo&nbsp;</span><span style="color: #DD0000">'&amp;lt;/tr&amp;gt;'</span><span style="color: #007700">;<br />}<br /></span>
+</span>
+</code></pre>
+
+<p>
+    A more complex query:
+</p>
+
+<pre class="highlight"><code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php<br /></span><span style="color: #FF8000">//&nbsp;complex&nbsp;query<br /></span><span style="color: #0000BB">$sql&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">Sql</span><span style="color: #007700">(</span><span style="color: #0000BB">$adapter</span><span style="color: #007700">);<br /></span><span style="color: #0000BB">$select&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">$sql</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">select</span><span style="color: #007700">()-&gt;</span><span style="color: #0000BB">from</span><span style="color: #007700">(</span><span style="color: #DD0000">'ARTIST'</span><span style="color: #007700">)<br />&nbsp;&nbsp;&nbsp;&nbsp;-&gt;</span><span style="color: #0000BB">columns</span><span style="color: #007700">(array())&nbsp;</span><span style="color: #FF8000">//&nbsp;no&nbsp;columns&nbsp;from&nbsp;main&nbsp;table<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">join</span><span style="color: #007700">(</span><span style="color: #DD0000">'ALBUM'</span><span style="color: #007700">,&nbsp;</span><span style="color: #DD0000">'ARTIST.ARTIST_ID&nbsp;=&nbsp;ALBUM.ARTIST_ID'</span><span style="color: #007700">,&nbsp;array(</span><span style="color: #DD0000">'TITLE'</span><span style="color: #007700">,&nbsp;</span><span style="color: #DD0000">'RELEASE_DATE'</span><span style="color: #007700">))<br />&nbsp;&nbsp;&nbsp;&nbsp;-&gt;</span><span style="color: #0000BB">order</span><span style="color: #007700">(array(</span><span style="color: #DD0000">'RELEASE_DATE'</span><span style="color: #007700">,&nbsp;</span><span style="color: #DD0000">'TITLE'</span><span style="color: #007700">))<br />&nbsp;&nbsp;&nbsp;&nbsp;-&gt;</span><span style="color: #0000BB">where</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">like</span><span style="color: #007700">(</span><span style="color: #DD0000">'ARTIST.NAME'</span><span style="color: #007700">,&nbsp;</span><span style="color: #DD0000">'%Brit%'</span><span style="color: #007700">);<br /></span><span style="color: #0000BB">$statement&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">$sql</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">prepareStatementFromSqlObject</span><span style="color: #007700">(</span><span style="color: #0000BB">$select</span><span style="color: #007700">);<br />foreach&nbsp;(</span><span style="color: #0000BB">$statement</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">execute</span><span style="color: #007700">()&nbsp;as&nbsp;</span><span style="color: #0000BB">$row</span><span style="color: #007700">)&nbsp;{<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #FF8000">//&nbsp;var_dump($row);<br /></span><span style="color: #007700">}<br /></span>
+</span>
+</code></pre>
+
+<h3>Other Interesting Additions to Zend\Db\Sql</h3>
+
+<p>
+    Join From SubSelect:
+</p>
+
+<pre class="highlight"><code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php<br />$subselect&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">Select</span><span style="color: #007700">;<br /></span><span style="color: #0000BB">$subselect</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">from</span><span style="color: #007700">(</span><span style="color: #DD0000">'bar'</span><span style="color: #007700">)-&gt;</span><span style="color: #0000BB">where</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">like</span><span style="color: #007700">(</span><span style="color: #DD0000">'y'</span><span style="color: #007700">,&nbsp;</span><span style="color: #DD0000">'%Foo%'</span><span style="color: #007700">);<br /></span><span style="color: #0000BB">$select&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">Select</span><span style="color: #007700">;<br /></span><span style="color: #0000BB">$select</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">from</span><span style="color: #007700">(</span><span style="color: #DD0000">'foo'</span><span style="color: #007700">)-&gt;</span><span style="color: #0000BB">join</span><span style="color: #007700">(array(</span><span style="color: #DD0000">'z'&nbsp;</span><span style="color: #007700">=&gt;&nbsp;</span><span style="color: #0000BB">$select39subselect</span><span style="color: #007700">),&nbsp;</span><span style="color: #DD0000">'z.foo&nbsp;=&nbsp;bar.id'</span><span style="color: #007700">);<br /><br /></span><span style="color: #FF8000">/*&nbsp;produces&nbsp;SQL92&nbsp;SQL&nbsp;(newlines&nbsp;added&nbsp;for&nbsp;readability):<br />SELECT&nbsp;"foo".*,&nbsp;"z".*<br />&nbsp;&nbsp;&nbsp;&nbsp;FROM&nbsp;"foo"<br />&nbsp;&nbsp;&nbsp;&nbsp;INNER&nbsp;JOIN&nbsp;(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SELECT&nbsp;"bar".*&nbsp;FROM&nbsp;"bar"<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WHERE&nbsp;"y"&nbsp;LIKE&nbsp;'%Foo%'<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;AS&nbsp;"z"&nbsp;ON&nbsp;"z"."foo"&nbsp;=&nbsp;"bar"."id"<br />&nbsp;*/<br /></span>
+</span>
+</code></pre>
+
+<p>
+    Expressions inside Order:
+</p>
+
+<pre class="highlight"><code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php<br />$select&nbsp;</span><span style="color: #007700">=&nbsp;new&nbsp;</span><span style="color: #0000BB">Select</span><span style="color: #007700">;<br /></span><span style="color: #0000BB">$select</span><span style="color: #007700">-&gt;</span><span style="color: #0000BB">order</span><span style="color: #007700">(new&nbsp;</span><span style="color: #0000BB">Expression</span><span style="color: #007700">(</span><span style="color: #DD0000">'RAND()'</span><span style="color: #007700">));<br /></span>
+</span>
+</code></pre>
+
+<h3>Call to Action</h3>
+
+<p>
+    Since our DB2 and Oracle drivers are new, we are sure they are not perfect 
+    yet and can be improved to better allow a more natural workflow for the 
+    database needs of a DB2 or Oracle developer.  If you find anything that is 
+    a bug, or feature request, please take the time to fill out an issue on our 
+    github repository for ZF2:
+</p>
+
+<ul>
+    <li><a href="https://github.com/zendframework/zf2/issues">https://github.com/zendframework/zf2/issues</a></li>
+</ul>
+
+<p>
+Happy ZFing!
+</p></article>
+
+<aside class="sidebar blog">
+    <div class="metadata">
+        <ul>
+            <li>Posted on <b>2013-02-01 12:00:00</b>.</li>
+            <li>Last updated on <b>2013-02-01 12:00:00</b>.</li>
+        </ul>
+    </div>
+
+    <div class="metadata">
+        <h4>Tags for this entry</h4>
+        <p class="tags"></p>
+    </div>
+</aside>
+
